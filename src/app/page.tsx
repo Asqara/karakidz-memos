@@ -1,103 +1,702 @@
-import Image from "next/image";
+"use client";
+import React, { useState, useEffect, useRef } from "react";
+import { supabase } from "@/lib/supabase";
+import {
+  Heart,
+  Star,
+  Music,
+  MessageCircle,
+  Camera,
+  Play,
+  Gift,
+  Home,
+  Clock,
+  Image,
+  Users,
+  GamepadIcon,
+  Sparkles,
+} from "lucide-react";
+import TypewriterText from "@/components/TypeWritter";
+import Fireworks from "@/components/FireWorks";
+import Link from "next/link";
 
-export default function Home() {
+// Types
+interface Memory {
+  id: string;
+  type: "photo" | "video";
+  src: string;
+  caption: string;
+  date: string;
+  category: string;
+}
+
+interface Message {
+  id: string;
+  content: string;
+  timestamp: string;
+  color: string;
+}
+
+interface GameAnswer {
+  question: string;
+  answer: string;
+  secretMessage: string;
+}
+
+// Dummy Data
+const memories: Memory[] = [
+  {
+    id: "1",
+    type: "photo",
+    src: "/images/1.png",
+    caption: "Welcome to Home Karakidz 🏠",
+    date: "01 Agustus 2025",
+    category:
+      "Seru banget ini moment pertama aku ketemu kalian, jujur aku kayak awikwok banget disini takut ga asik di first meet zoom. Tapi kalian semangat semangat dan mau kenalan abis itu kalian aktif aktif juga aku bangga banget cokk sama karakidz 😍",
+  },
+  {
+    id: "2",
+    type: "photo",
+    src: "/images/2.png",
+    caption: "Perpus Tour! 🍝",
+    date: "Lupa njr tanggal berapa",
+    category:
+      "Asik banget cok ini perpus tour btw disini yang bolos gw tandain jangan lupa tour perpus yak..",
+  },
+  {
+    id: "3",
+    type: "video",
+    src: "/videos/jargon.mp4",
+    caption: "Pertama Banget Ketemu Tapi Belum Full Team Kita",
+    date: "Pokoknya waktu ganantara mengudara",
+    category:
+      "Asli ini lucu banget, pertama banget jargon pertama kali ketemu dan kita bersaing dengan anak anak batch 1 tapi kalian ga kalah semangat cokk",
+  },
+  {
+    id: "4",
+    type: "photo",
+    src: "/images/nonton.jpg",
+    caption: "Nonton Bioskop",
+    date: "Lupa tanggal berapa ini",
+    category:
+      "Njr ini bener bener se tiba tiba itu abis malem malem keujanan dan kita asbun pengen nonton kerennya ga wacana kelaazz",
+  },
+  {
+    id: "5",
+    type: "photo",
+    src: "/images/lari.jpg",
+    caption: "Lari Pagi",
+    date: "Lupa tanggal berapa",
+    category: "Lari pagi buat yang mau mau ajah... yang sehat sehat aja",
+  },
+  {
+    id: "6",
+    type: "photo",
+    src: "/images/first.jpg",
+    caption: "First Meet Full Team",
+    date: "06 Agustus 2025",
+    category:
+      "Aku disini seneng banget ketemu kalian semua kayak anjr kalian nyata cuman -2 akhtar dan sekar...",
+  },
+  {
+    id: "7",
+    type: "photo",
+    src: "/images/day1.jpg",
+    caption: "NJR INI DAY 1 MPKMB",
+    date: "06 Agustus 2025",
+    category:
+      "WKWKWK seru gaaa mpkmb nya asik kann, semangat terus di perjalanan kalian yak gw bangga banget cok sama klean bisa cepet bonding dan kenalan",
+  },
+];
+
+// Components
+const ParticleBackground = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles: Array<{
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      size: number;
+      color: string;
+    }> = [];
+
+    const colors = [
+      "#FF6B9D",
+      "#4ECDC4",
+      "#45B7D1",
+      "#FFA07A",
+      "#98D8C8",
+      "#F7DC6F",
+    ];
+
+    for (let i = 0; i < 50; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2,
+        size: Math.random() * 4 + 2,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      });
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((particle) => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+
+        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
+        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fillStyle = particle.color + "60";
+        ctx.fill();
+      });
+
+      requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
+  );
+};
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+const MemoryCard = ({
+  memory,
+  onClick,
+}: {
+  memory: Memory;
+  onClick: () => void;
+}) => {
+  return (
+    <div
+      className="group cursor-pointer transform transition-all duration-300 hover:scale-105 hover:-rotate-2 hover:shadow-xl"
+      onClick={onClick}
+    >
+      <div className="relative overflow-hidden rounded-2xl shadow-lg bg-white p-2">
+        {memory.type === "photo" ? (
+          <img
+            src={memory.src}
+            alt={memory.caption}
+            className="w-full h-48 object-cover rounded-xl transition-transform duration-300 group-hover:scale-110"
+          />
+        ) : (
+          <div className="relative">
+            <video
+              src={memory.src}
+              className="w-full h-48 object-cover rounded-xl"
+              muted
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-xl">
+              <Play className="w-12 h-12 text-white opacity-80" />
+            </div>
+          </div>
+        )}
+
+        <div className="p-3">
+          <p className="text-[15px] font-bold text-gray-800 mb-1">
+            {memory.caption}
+          </p>
+          <p className="text-xs text-gray-500">{memory.date}</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+          {memory.type === "photo" ? (
+            <Camera className="w-5 h-5 text-white drop-shadow-lg" />
+          ) : (
+            <Play className="w-5 h-5 text-white drop-shadow-lg" />
+          )}
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+const StickyNote = ({
+  message,
+  onRemove,
+}: {
+  message: Message;
+  onRemove?: () => void;
+}) => {
+  return (
+    <div
+      className={`${message.color} p-4 rounded-lg shadow-lg transform rotate-1 hover:rotate-0 transition-all duration-300 hover:scale-105 cursor-pointer relative animate-fade-in-up`}
+      style={{ animationDelay: Math.random() * 0.5 + "s" }}
+    >
+      <div className="absolute top-2 left-2 w-4 h-4 bg-yellow-400 rounded-full shadow-sm"></div>
+      <p className="text-gray-800 font-handwriting text-sm pt-2">
+        {message.content}
+      </p>
+      <div className="text-xs text-gray-600 mt-2 text-right">- Karakidz</div>
+    </div>
+  );
+};
+
+// Main App Component
+const MemoryLaneApp = () => {
+  const [currentPage, setCurrentPage] = useState<string>("landing");
+  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [gameAnswers, setGameAnswers] = useState<{ [key: number]: string }>({});
+  const [unlockedSecrets, setUnlockedSecrets] = useState<string[]>([]);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+
+  // Ambil pesan awal + aktifkan realtime
+  useEffect(() => {
+    const fetchMessages = async () => {
+      const { data, error } = await supabase
+        .from("messages")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) console.error(error);
+      else setMessages(data as Message[]);
+    };
+
+    fetchMessages();
+
+    // Listen pesan baru (INSERT)
+    const channel = supabase
+      .channel("messages-realtime")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        (payload) => {
+          setMessages((prev) => [payload.new as Message, ...prev]);
+        }
+      )
+      .subscribe();
+
+    // Bersihkan listener saat komponen unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+  // Kirim pesan ke Supabase
+  const handleSendMessage = async () => {
+    if (!newMessage.trim()) return;
+
+    const colors = [
+      "bg-pink-200",
+      "bg-yellow-200",
+      "bg-blue-200",
+      "bg-green-200",
+      "bg-purple-200",
+      "bg-orange-200",
+    ];
+
+    const color = colors[Math.floor(Math.random() * colors.length)];
+
+    const { error } = await supabase
+      .from("messages")
+      .insert([{ content: newMessage, color }]);
+
+    if (!error) {
+      setNewMessage("");
+    }
+  };
+
+  const triggerConfetti = () => {
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 3000);
+  };
+
+  // Navigation
+  const navItems = [
+    { id: "landing", icon: Home, label: "Home" },
+    { id: "timeline", icon: Clock, label: "Memories Karakidz" },
+    { id: "messages", icon: MessageCircle, label: "Buat Karakidz" },
+    { id: "guestbook", icon: Users, label: "Menfess" },
+    { id: "closing", icon: Sparkles, label: "Penutup" },
+  ];
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case "landing":
+        return (
+          <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+            <ParticleBackground />
+            <div className="text-center z-10 px-6">
+              <div className="mb-8">
+                <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-pink-400 via-purple-500 to-blue-500 bg-clip-text text-transparent mb-4">
+                  Karakidz Memory Lane
+                </h1>
+                <div className="text-xl md:text-2xl text-gray-700 font-light">
+                  <TypewriterText />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <button
+                  onClick={() => setCurrentPage("timeline")}
+                  className="bg-gradient-to-r from-pink-400 to-purple-500 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                >
+                  Mulai Perjalanan 🚀
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "timeline":
+        return (
+          <div className="min-h-screen py-20 px-6">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                Kenangan Singkat Moment Moment Kita
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {memories.map((memory) => (
+                  <MemoryCard
+                    key={memory.id}
+                    memory={memory}
+                    onClick={() => setSelectedMemory(memory)}
+                  />
+                ))}
+              </div>
+              <div className="mt-20 flex justify-center px-4">
+                <Link
+                  href="https://drive.google.com/drive/folders/1U6D9Q7xdd7w1jyMh39ut_KGBidC47Qc3" // ganti dengan link Google Drive kamu
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-center mb-12
+                   bg-gradient-to-r from-purple-600 to-blue-600
+                   bg-clip-text text-transparent
+                   hover:opacity-80 transition-all duration-300
+                   text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
+                >
+                  Buka Kenangan Kita Full Memories Disini
+                </Link>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "messages":
+        return (
+          <div className="min-h-screen py-20 px-6">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-red-500 to-pink-600 bg-clip-text text-transparent">
+                Pesan Aku Untuk Kalian
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                <div className="lg:col-span-2 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl p-8 shadow-lg">
+                  <h3 className="text-2xl font-bold mb-4 text-gray-800">
+                    Untuk Karakidz
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed mb-4">
+                    Semangat ya jalanin PPKU nya, aku yakin kalian bisa menjadi
+                    orang orang keren orang orang hebat, gw pesen jangan fomo
+                    ikut ini ikut itu siihh
+                  </p>
+                  <p className="text-gray-700 leading-relaxed">
+                    Terima kasih sudah menjadi cerita dalam perjalanan MPKMB
+                    yaa, jangan lupa sama temen pertama kalian dikuliah sekarang
+                    sering sering main ini bukan perpisahan guys yaaa..., JANGAN
+                    LUPA NEXT KITA MAKRAB YAK
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl p-6 shadow-lg">
+                  <h4 className="text-xl font-bold mb-4 text-gray-800">
+                    Harapan Aku Buat Kalian -
+                  </h4>
+                  <ul className="space-y-2 text-gray-700">
+                    <li>Tugas Jangan Lupa Dikerjain</li>
+                    <li>Jangan Fomo Ikut Organisasi</li>
+                    <li>Agendakan Nge Vila yakk</li>
+                    <li className="font-bold">
+                      Terpenting, Jangan lupa Karakidz dan Jangan Asing!!!
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-8">
+                <h3 className="text-2xl font-bold mb-6 text-center text-gray-800">
+                  Kata Kata Dari Gw
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <blockquote className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-xl italic text-gray-700">
+                    "Keluarga bukan tentang darah, tapi tentang cinta yang
+                    mengalir di antara kita."
+                  </blockquote>
+                  <blockquote className="bg-gradient-to-br from-green-50 to-teal-50 p-6 rounded-xl italic text-gray-700">
+                    "Jangan Takut Mencoba, Kalau kalian mencoba peluang kalian
+                    akan diantara 0-1 dan jika kalian tidak mencoba peluang
+                    kalian akan tetap 0"
+                  </blockquote>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "guestbook":
+        return (
+          <div className="min-h-screen py-20 px-6">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-teal-600 to-green-600 bg-clip-text text-transparent">
+                Kata kata dong buat karakidz dan aku
+              </h2>
+
+              <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h3 className="text-xl font-bold mb-4 text-gray-800">
+                  Hayoo mau ngasih kata kata apaa??
+                </h3>
+                <div className="flex flex-col gap-4">
+                  <textarea
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Tuliskan pesan kamu di sini..."
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:outline-none resize-none"
+                    rows={4}
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    className="self-start bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                  >
+                    Kirim Pesan 💌
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {messages.map((message) => (
+                  <StickyNote key={message.id} message={message} />
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case "closing":
+        return (
+          <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+            {showConfetti && (
+              <div className="fixed inset-0 pointer-events-none z-50">
+                <Fireworks duration={5} />
+              </div>
+            )}
+
+            <div className="text-center px-6 z-10">
+              <div className="mb-12">
+                <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-pink-400 via-purple-500 to-blue-500 bg-clip-text text-transparent mb-6">
+                  Terima Kasih KARAKIDZ!
+                </h1>
+                <div className="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+                  Perjalanan di Memory Lane ini adalah cerminan dari cinta dan
+                  kebahagiaan yang kita bagi bersama. Kalian adalah anugerah
+                  terbesar dalam hidup kami.
+                </div>
+              </div>
+
+              <div className="bg-white bg-opacity-90 rounded-2xl shadow-xl p-8 max-w-2xl mx-auto mb-8">
+                <p className="text-lg text-gray-800 mb-6 leading-relaxed">
+                  "Keluarga adalah tempat di mana hidup dimulai dan cinta tidak
+                  pernah berakhir. Kalian adalah keluarga kami, dan cinta kami
+                  untuk kalian akan abadi selamanya."
+                </p>
+                <p className="text-2xl font-bold bg-gradient-to-r from-red-500 to-pink-600 bg-clip-text text-transparent">
+                  - Kata Kata Diatas Chat GPT
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <button
+                  onClick={triggerConfetti}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 mb-4"
+                >
+                  Rayakan Pertemuan Kita! 🎉
+                </button>
+
+                <button
+                  onClick={() => setCurrentPage("landing")}
+                  className="block mx-auto bg-gradient-to-r from-blue-500 to-teal-500 text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300"
+                >
+                  Kembali ke Awal 🏠
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 relative">
+      {/* Background Music Indicator */}
+      {isPlaying && (
+        <div className="fixed top-4 right-4 z-50 bg-white bg-opacity-90 rounded-full p-3 shadow-lg">
+          <Music className="w-6 h-6 text-green-500 animate-pulse" />
+        </div>
+      )}
+
+      {/* Navigation Bar */}
+      {currentPage !== "landing" && (
+        <nav className="fixed bottom-0 left-0 right-0 bg-white bg-opacity-95 backdrop-blur-sm border-t border-gray-200 z-40">
+          <div className="flex justify-around items-center py-2 px-4 max-w-4xl mx-auto">
+            {navItems.slice(0, 4).map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setCurrentPage(item.id)}
+                className={`flex flex-col items-center p-2 rounded-lg transition-all duration-300 ${
+                  currentPage === item.id
+                    ? "bg-purple-100 text-purple-600 transform scale-110"
+                    : "text-gray-600 hover:text-purple-600 hover:bg-gray-100"
+                }`}
+              >
+                <item.icon className="w-5 h-5 mb-1" />
+                <span className="text-xs font-medium">{item.label}</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex justify-around items-center py-2 px-4 max-w-4xl mx-auto border-t border-gray-100">
+            {navItems.slice(4).map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setCurrentPage(item.id)}
+                className={`flex flex-col items-center p-2 rounded-lg transition-all duration-300 ${
+                  currentPage === item.id
+                    ? "bg-purple-100 text-purple-600 transform scale-110"
+                    : "text-gray-600 hover:text-purple-600 hover:bg-gray-100"
+                }`}
+              >
+                <item.icon className="w-5 h-5 mb-1" />
+                <span className="text-xs font-medium">{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </nav>
+      )}
+
+      {/* Main Content */}
+      <main className={currentPage !== "landing" ? "pb-32" : ""}>
+        {renderPage()}
+      </main>
+
+      {/* Memory Detail Modal */}
+      {selectedMemory && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="relative">
+              <button
+                onClick={() => setSelectedMemory(null)}
+                className="absolute top-4 right-4 z-10 bg-white bg-opacity-90 rounded-full p-2 shadow-lg hover:shadow-xl transition-all"
+              >
+                ✕
+              </button>
+
+              {selectedMemory.type === "photo" ? (
+                <img
+                  src={selectedMemory.src}
+                  alt={selectedMemory.caption}
+                  className="w-full h-64 md:h-96 object-cover rounded-t-2xl"
+                />
+              ) : (
+                <video
+                  src={selectedMemory.src}
+                  controls
+                  className="w-full h-64 md:h-96 object-cover rounded-t-2xl"
+                />
+              )}
+
+              <div className="p-6">
+                <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                  {selectedMemory.caption}
+                </h3>
+                <p className="text-gray-600 mb-4">{selectedMemory.date}</p>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-gray-700 leading-relaxed">
+                    {selectedMemory.category}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Styles */}
+      <style jsx>{`
+        .font-handwriting {
+          font-family: "Comic Sans MS", cursive, sans-serif;
+        }
+
+        .masonry-layout {
+          column-gap: 1rem;
+        }
+
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(20px) rotate(3deg);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) rotate(1deg);
+          }
+        }
+
+        .animate-fade-in-up {
+          animation: fade-in-up 0.6s ease-out forwards;
+        }
+
+        @media (max-width: 768px) {
+          .masonry-layout {
+            columns: 1;
+          }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .masonry-layout {
+            columns: 2;
+          }
+        }
+
+        @media (min-width: 1025px) {
+          .masonry-layout {
+            columns: 3;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default MemoryLaneApp;
